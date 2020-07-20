@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,7 +15,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    private LocalDateTime receivedAt;
+    private Instant receivedAt;
     private String sentBy;
     private String subject;
     private String snippet;
@@ -24,7 +25,7 @@ public class Task {
     public Task() {
     }
 
-    public Task(LocalDateTime receivedAt, String sentBy, String subject, String snippet, String status, String editBy) {
+    public Task(Instant receivedAt, String sentBy, String subject, String snippet, String status, String editBy) {
         this.receivedAt = receivedAt;
         this.sentBy = sentBy;
         this.subject = subject;
@@ -41,11 +42,11 @@ public class Task {
         this.id = id;
     }
 
-    public LocalDateTime getReceivedAt() {
+    public Instant getReceivedAt() {
         return receivedAt;
     }
 
-    public void setReceivedAt(LocalDateTime receivedAt) {
+    public void setReceivedAt(Instant receivedAt) {
         this.receivedAt = receivedAt;
     }
 

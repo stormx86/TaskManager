@@ -2,8 +2,10 @@ package pl.kozhanov.TaskManager.domain;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.kozhanov.TaskManager.service.validation.NewUserConstraint;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.Set;
 
@@ -14,6 +16,8 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @NotBlank(message = "Username field can't be empty")
+    @NewUserConstraint
     private String username;
     private String password;
     private boolean active;
@@ -26,6 +30,7 @@ public class User implements UserDetails {
     public Long getId() {
         return id;
     }
+
 
     public void setId(Long id) {
         this.id = id;

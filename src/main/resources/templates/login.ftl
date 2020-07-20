@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <link rel="stylesheet" href ="css/login.css"/>
-    <title>Sign In Page Page</title>
+    <title>Sign In Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href ="css/login.css">
 </head>
 <body>
-
-<div class="ribbon"></div>
-<div class="login">
-    <h1>Task Manager</h1>
-    <p>Sign In Please</p>
+<div class="login-form">
     <form action="/login" method="post">
-        <div class="input">
-            <div class="blockinput">
-                <i class="icon-envelope-alt"></i><input type="text" name="username" placeholder="Username">
-            </div>
-            <div class="blockinput">
-                <i class="icon-unlock"></i><input type="password" name="password" placeholder="Password">
-            </div>
+        <h4 align="center">Task Manager</h4>
+        <p align="center">Sign In Please</p>
+        <div class="form-group">
+            <input type="text" class="form-control" name="username" placeholder="Username">
         </div>
-        <#if RequestParameters.error??>
-            <div>
-                <span style="font-size:15px; color: #ff362a;">Incorrect username or password</span>
-            </div>
-        </#if>
+        <div class="form-group">
+            <input type="password" class="form-control" name="password" placeholder="Password">
+            <#if RequestParameters.error??>
+                <div>
+                    <span style="font-size:15px; color: #ff362a;">Incorrect username or password</span>
+                </div>
+            </#if>
+        </div>
         <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-        <button>Login</button>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+        </div>
     </form>
 </div>
-
 </body>
 </html>

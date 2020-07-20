@@ -4,82 +4,63 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import pl.kozhanov.TaskManager.domain.Role;
-import pl.kozhanov.TaskManager.domain.User;
-import pl.kozhanov.TaskManager.repos.UserRepo;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import pl.kozhanov.TaskManager.service.UserService;
 
 @Controller
-@RequestMapping("/user")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
 public class UserController {
 
     @Autowired
-    private UserRepo userRepo;
+    UserService userService;
 
-    @GetMapping
-    public String userList(Model model){
-        model.addAttribute("users", userRepo.findAll());
-        return "userList";
+    @GetMapping("user/{username}")
+    public  String userProfile(@PathVariable String username, Model model){
+        if(userService.getCurrentLoggedInUsername().equals(username))
+        {
+            model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+            return "userProfile";
+        }
+        else{
+            model.addAttribute("enteredUsername", username);
+            return "user403";
+        }
     }
 
-    @GetMapping("{user}")
-    public String userEditForm(@PathVariable User user, Model model){
-        model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
-
-        return  "userEdit";
-    }
-
-    @GetMapping("addUser")
-        public String addNewUser(Model model){
-        User user = new User();
-        user.setUsername("NewUser");
-        user.setPassword("1");
-        user.setActive(true);
-        user.setRoles(Collections.singleton(Role.USER));
-        userRepo.save(user);
-        model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
-
-        return "userEdit";
+    @PostMapping("/changeUserPassword")
+    public String changeUserPassword(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            @RequestParam("passwordConfirm") String passwordConfirm, Model model){
+        boolean hasErrors = false;
+        if(StringUtils.isEmpty(password)) {
+            model.addAttribute("passwordError", "Password can't be empty");
+            hasErrors=true;
+        }
+        if(StringUtils.isEmpty(passwordConfirm)){
+            model.addAttribute("password2Error", "Password confirmation can't be empty");
+            hasErrors=true;
+        }
+        if(password != null && !password.equals(passwordConfirm)){
+            model.addAttribute("passwordDifferentError", "Passwords are different");
+            hasErrors=true;
         }
 
-    @GetMapping("delete/{user}")
-    public String deleteUser(@PathVariable User user, Model model){
-        userRepo.delete(user);
-        model.addAttribute("users", userRepo.findAll());
-
-        return  "redirect:/user";
-    }
-
-
-    @PostMapping
-    public String userSave(
-            @RequestParam String username,
-            @RequestParam Map<String, String> form,
-            @RequestParam("userId") User user){
-
-        user.setUsername(username);
-
-        Set<String> roles = Arrays.stream(Role.values()).map(Role::name).collect(Collectors.toSet());
-
-        user.getRoles().clear();
-        for(String key :form.keySet()){
-            if(roles.contains(key)){
-                user.getRoles().add(Role.valueOf(key));
-            }
+        if(hasErrors)
+        {
+            model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+            return "userProfile";
         }
-
-        userRepo.save(user);
-        return "redirect:/user";
+        else {
+            userService.changeUserPassword(username, password);
+            model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+            model.addAttribute("responseMessage", "success");
+            return "userProfile";
+        }
     }
-
 
 }

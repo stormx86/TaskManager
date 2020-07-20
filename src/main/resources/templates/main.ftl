@@ -1,8 +1,10 @@
 <html>
 <head>
     <#assign security=JspTaglibs["http://www.springframework.org/security/tags"]/>
+    <#import "parts/menu.ftl" as m>
     <#import "parts/pager.ftl" as p>
     <title>Welcome to the Task Manager</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href ="css/main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
@@ -70,70 +72,61 @@
 
     </head>
 <body>
+<div class="container-fluid">
+    <@m.menu/>
+    <div class="row">
+        <div class="col">
+            <@p.pager url page/>
+        </div>
+    </div>
 
-<div>
-    <form action="/logout" method="post">
-        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-        <input type="submit" class="button_cl" value="Sign Out"/>
-    </form>
-
-    <form action="refresh" method="post">
-        <input type="submit" class="button_cl" value="Refresh"/>
-        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-    </form>
-    <@security.authorize access="hasAnyAuthority('ADMIN')">
-    <form action="/editTask/deleteAll" method="post">
-        <input type="submit" class="button_cl" value="Delete All Tasks"/>
-        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-    </form>
-
-    <form action="/user" method="get">
-        <input type="submit" class="button_cl" value="User list" />
-    </form>
-    </@security.authorize>
-
-    <span id="ct" class="checktask"></span>
+    <div class="row">
+        <div class="col">
+            <table id = "tasksTable" class="table table-hover table-bordered">
+                <tr>
+                    <th style="display:none;">id</th>
+                    <th style="width: 8%" scope="col">Received On</th>
+                    <th style="width: 9%" scope="col">From</th>
+                    <th style="width: 20%" scope="col">Subject</th>
+                    <th scope="col">Snippet</th>
+                    <th style="width: 6%" scope="col">Status</th>
+                    <th style="width: 8%" scope="col">Changed By</th>
+                    <@security.authorize access="hasAnyAuthority('ADMIN')">
+                        <th></th>
+                    </@security.authorize>
+                </tr>
+                <#list page.content as task>
+                    <tr>
+                        <td style="display:none;">${task.id}</td>
+                        <td>${task.receivedAtFormatted}</td>
+                        <td>${task.sentBy}</td>
+                        <td style="height: 90px">${task.subject}</td>
+                        <td>${task.snippet}</td>
+                        <td class="status">${task.status}</td>
+                        <td class="editBy">${task.editBy}</td>
+                        <@security.authorize access="hasAnyAuthority('ADMIN')">
+                            <td>
+                                <form action="/editTask/delete/${task.id}" method="get">
+                                    <input type="submit" class="btn btn-outline-dark btn-sm" value="Delete" />
+                                </form>
+                            </td>
+                        </@security.authorize>
+                    </tr>
+                <#else>
+                    No task
+                </#list>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <@p.pager url page/>
+        </div>
+    </div>
 
 </div>
-<@p.pager url page/>
-    <div>
-    <table id = "tasksTable" class="tbTasks" cellspacing='0'>
-    <tr>
-        <th style="display:none;">id</th>
-        <th>DateTime</th>
-        <th>From</th>
-        <th>Subject</th>
-        <th>Snippet</th>
-        <th>Status</th>
-        <th>EditBy</th>
-        <@security.authorize access="hasAnyAuthority('ADMIN')">
-        <th></th>
-        </@security.authorize>
-    </tr>
-<#list page.content as task>
-    <tr>
-        <td style="display:none;">${task.id}</td>
-        <td>${task.receivedAt}</td>
-        <td>${task.sentBy}</td>
-        <td>${task.subject}</td>
-        <td>${task.snippet}</td>
-        <td class="status">${task.status}</td>
-        <td class="editBy">${task.editBy}</td>
-        <@security.authorize access="hasAnyAuthority('ADMIN')">
-        <td>
-            <form action="/editTask/delete/${task.id}" method="get">
-                <input type="submit" class="button_cl" value="Delete" />
-            </form>
-        </td>
-        </@security.authorize>
-    </tr>
-<#else>
-No task
-</#list>
-    </table>
-    </div>
-<@p.pager url page/>
-
-
+<#--<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 </body>
 </html>

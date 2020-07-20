@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.domain;
+package pl.kozhanov.TaskManager.service;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -17,6 +17,7 @@ import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.MessagePartHeader;
 import com.google.api.services.gmail.model.ModifyMessageRequest;
 import org.springframework.stereotype.Component;
+import pl.kozhanov.TaskManager.domain.Task;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Component
-public class TaskParser {
+public class TaskParserService {
 
 
     private static final String APPLICATION_NAME = "Gmail API Java Quickstart";
@@ -59,7 +60,7 @@ public class TaskParser {
      */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
-        InputStream in = TaskParser.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        InputStream in = TaskParserService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
@@ -92,7 +93,7 @@ public class TaskParser {
 
                 Message message2 = service.users().messages().get(userId, message.getId()).execute();
                 List<MessagePartHeader> headers = message2.getPayload().getHeaders();
-                LocalDateTime receivedAt = LocalDateTime.ofInstant(Instant.ofEpochMilli(message2.getInternalDate()), ZoneId.systemDefault());
+                Instant receivedAt = Instant.ofEpochMilli(message2.getInternalDate());
                 String sentBy = getHeader(headers, "From");
                 if(getHeader(headers, "Subject")!=null){
                     subject = getHeader(headers, "Subject");
