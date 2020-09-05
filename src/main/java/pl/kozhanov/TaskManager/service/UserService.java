@@ -17,60 +17,72 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements UserDetailsService {
 
-@Autowired
-private UserRepo userRepo;
+    @Autowired
+    private UserRepo userRepo;
 
-@Autowired
-PasswordEncoder passwordEncoder;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepo userRepo, PasswordEncoder passwordEncoder) {
+        this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
+
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepo.findByUsername(username);
     }
 
-    public List<User> findAll(){
+    public List<User> findAll() {
         return userRepo.findAll();
     }
 
-    public User findByUsername(String username){ return  userRepo.findByUsername(username); }
+    public User findByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
 
-    public void addUser(User user){
+    public void addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getUsername()));
         user.setActive(true);
         user.setRoles(Collections.singleton(Role.USER));
         userRepo.save(user);
     }
 
-    public void saveUser(User user, String newUsername, Map<String, String> form){
+    public void saveUser(User user, String newUsername, Map<String, String> form) {
         user.setUsername(newUsername);
         Set<String> roles = Arrays.stream(Role.values()).map(Role::name).collect(Collectors.toSet());
-        user.getRoles().clear();
-        for(String key :form.keySet()){
-            if(roles.contains(key)){
+        if(user.getRoles() != null)
+        {
+            user.getRoles().clear();
+        }
+        for (String key : form.keySet()) {
+            if (roles.contains(key)) {
                 user.getRoles().add(Role.valueOf(key));
             }
         }
         userRepo.save(user);
     }
 
-    public String getCurrentLoggedInUsername()
-    {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails)principal).getUsername();
-        } else {
-            return principal.toString();
+    public String getCurrentLoggedInUsername() {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) return "No user logged in";
+        else {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                return ((UserDetails) principal).getUsername();
+            } else {
+                return principal.toString();
+            }
         }
     }
 
-    public void changeUserPassword(String username, String password){
+    public void changeUserPassword(String username, String password) {
         User user = userRepo.findByUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         userRepo.save(user);
     }
 
-    public void resetUserPassword(User user)
-    {
+    public void resetUserPassword(User user) {
         user.setPassword(passwordEncoder.encode(user.getUsername()));
         userRepo.save(user);
     }

@@ -19,13 +19,11 @@ public class UserController {
     UserService userService;
 
     @GetMapping("user/{username}")
-    public  String userProfile(@PathVariable String username, Model model){
-        if(userService.getCurrentLoggedInUsername().equals(username))
-        {
+    public String userProfile(@PathVariable String username, Model model) {
+        if (userService.getCurrentLoggedInUsername().equals(username)) {
             model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
             return "userProfile";
-        }
-        else{
+        } else {
             model.addAttribute("enteredUsername", username);
             return "user403";
         }
@@ -35,27 +33,25 @@ public class UserController {
     public String changeUserPassword(
             @RequestParam("username") String username,
             @RequestParam("password") String password,
-            @RequestParam("passwordConfirm") String passwordConfirm, Model model){
+            @RequestParam("passwordConfirm") String passwordConfirm, Model model) {
         boolean hasErrors = false;
-        if(StringUtils.isEmpty(password)) {
+        if (StringUtils.isEmpty(password)) {
             model.addAttribute("passwordError", "Password can't be empty");
-            hasErrors=true;
+            hasErrors = true;
         }
-        if(StringUtils.isEmpty(passwordConfirm)){
+        if (StringUtils.isEmpty(passwordConfirm)) {
             model.addAttribute("password2Error", "Password confirmation can't be empty");
-            hasErrors=true;
+            hasErrors = true;
         }
-        if(password != null && !password.equals(passwordConfirm)){
+        if (password != null && !password.equals(passwordConfirm)) {
             model.addAttribute("passwordDifferentError", "Passwords are different");
-            hasErrors=true;
+            hasErrors = true;
         }
 
-        if(hasErrors)
-        {
+        if (hasErrors) {
             model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
             return "userProfile";
-        }
-        else {
+        } else {
             userService.changeUserPassword(username, password);
             model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
             model.addAttribute("responseMessage", "success");

@@ -25,8 +25,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,13 +34,12 @@ import java.util.List;
 public class TaskParserService {
 
 
-    private static final String APPLICATION_NAME = "Gmail API Java Quickstart";
+    private static final String APPLICATION_NAME = "Task Manager";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final String userId = "me";
-    private static String messageId = "1723e0ae62dd5d95";
+    private static final String USER_ID = "me";
     private static String query = "in:inbox is:unread";
-    private String subject = "";
+
 
 
     /**
@@ -54,6 +51,7 @@ public class TaskParserService {
 
     /**
      * Creates an authorized Credential object.
+     *
      * @param HTTP_TRANSPORT The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
@@ -78,54 +76,53 @@ public class TaskParserService {
 
 
     public List<Task> getTask() throws IOException, GeneralSecurityException {
-        List<Task> tasks = new ArrayList<Task>();
-
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-
-        ListMessagesResponse response = service.users().messages().list(userId).setQ(query).execute();
+        Gmail service = getGmailService();
+        List<Task> tasks = new ArrayList<>();
+        ListMessagesResponse response = service.users().messages().list(USER_ID).setQ(query).execute();
         List<Message> messages = response.getMessages();
-        if(messages != null) {
+        if (messages != null) {
             for (Message message : messages) {
-                service.users().messages().modify(userId, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<String>(Arrays.asList("UNREAD")))).execute();
-
-                Message message2 = service.users().messages().get(userId, message.getId()).execute();
-                List<MessagePartHeader> headers = message2.getPayload().getHeaders();
-                Instant receivedAt = Instant.ofEpochMilli(message2.getInternalDate());
-                String sentBy = getHeader(headers, "From");
-                if(getHeader(headers, "Subject")!=null){
-                    subject = getHeader(headers, "Subject");
-                }
-                else{
-                    subject = "No Subject";
-                }
-                String snippet = message2.getSnippet();
-                String status = "Waiting";
-                String editBy = "";
-                tasks.add(new Task(receivedAt, sentBy, subject, snippet, status, editBy));
+                service.users().messages().modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<>(Arrays.asList("UNREAD")))).execute();
+                Message newMessage = service.users().messages().get(USER_ID, message.getId()).execute();
+                tasks.add(formTask(newMessage));
             }
         }
         return tasks;
     }
 
-    public boolean checkTask() throws IOException, GeneralSecurityException{
+    private Task formTask(Message newMessage) {
+        List<MessagePartHeader> headers = newMessage.getPayload().getHeaders();
+        String subject = "";
+        Instant receivedAt = Instant.ofEpochMilli(newMessage.getInternalDate());
+        String sentBy = getHeader(headers, "From");
+        if (getHeader(headers, "Subject") != null) {
+            subject = getHeader(headers, "Subject");
+        } else {
+            subject = "No Subject";
+        }
+        String snippet = newMessage.getSnippet();
+        String status = "Waiting";
+        String editBy = "";
+        return new Task(receivedAt, sentBy, subject, snippet, status, editBy);
+    }
+
+    private Gmail getGmailService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-        ListMessagesResponse response = service.users().messages().list(userId).setQ(query).execute();
-        if(response.getMessages() != null){
-            return true;
-        }
-            return false;
+    }
+
+    public boolean checkTask() throws IOException, GeneralSecurityException {
+        Gmail service = getGmailService();
+        ListMessagesResponse response = service.users().messages().list(USER_ID).setQ(query).execute();
+        return (response.getMessages() != null);
     }
 
 
-    public static String getHeader(List<MessagePartHeader> headers, String name ){
-        for(MessagePartHeader h : headers) {
-            if(h.getName().equals(name)) {
+    public static String getHeader(List<MessagePartHeader> headers, String name) {
+        for (MessagePartHeader h : headers) {
+            if (h.getName().equals(name)) {
                 return h.getValue();
             }
         }

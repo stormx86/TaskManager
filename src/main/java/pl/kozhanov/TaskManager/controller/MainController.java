@@ -36,7 +36,7 @@ public class MainController {
 
 
     @GetMapping("/")
-    public String index(Model model, Pageable pageable){
+    public String index(Model model, Pageable pageable) {
 
         Page<TaskViewProjection> page = taskRepo.findAllByOrderByReceivedAtDesc(pageable);
         model.addAttribute("page", page);
@@ -51,40 +51,36 @@ public class MainController {
             taskRepo.save(t);
             System.out.println("Task saved");
         }
-        /*Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getName());*/
         return "redirect:/";
     }
 
 
-    @PostMapping(value="changestatus")
+    @PostMapping(value = "changestatus")
     @ResponseBody
     public String[] changeStatus(@RequestParam("id") String id, Map<String, Object> model) {
-       Task task = taskRepo.findById(Integer.parseInt(id));
+        Task task = taskRepo.findById(Integer.parseInt(id));
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-       if(task.getStatus().equals("Waiting")) {
-           task.setStatus("Processing");
-           task.setEditBy(auth.getName());
-           taskRepo.save(task);
-       }
-       else if(task.getStatus().equals("Processing") && task.getEditBy().equals(auth.getName()))  {
-           task.setStatus("Waiting");
-           task.setEditBy("");
-           taskRepo.save(task);
-       }
+        if (task.getStatus().equals("Waiting")) {
+            task.setStatus("Processing");
+            task.setEditBy(auth.getName());
+            taskRepo.save(task);
+        } else if (task.getStatus().equals("Processing") && task.getEditBy().equals(auth.getName())) {
+            task.setStatus("Waiting");
+            task.setEditBy("");
+            taskRepo.save(task);
+        }
         return new String[]{task.getStatus(), task.getEditBy()};
     }
 
     @PostMapping(value = "checktask")
     @ResponseBody
-    public String checkTask() throws IOException, GeneralSecurityException{
-        if(taskParserService.checkTask()){
+    public String checkTask() throws IOException, GeneralSecurityException {
+        if (taskParserService.checkTask()) {
             return ("New Task available!");
         }
-            return ("");
+        return ("");
     }
-
 
 
 }
