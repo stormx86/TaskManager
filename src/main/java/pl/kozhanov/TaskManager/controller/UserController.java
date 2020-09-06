@@ -11,9 +11,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.kozhanov.TaskManager.service.UserService;
 
+/**
+ * @author Anton Kozhanov
+ * User profile functionality
+ */
 @Controller
 @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
 public class UserController {
+
+    private static final String LOGGED_USER = "loggedUser";
+    private static final String USER_PROFILE = "userProfile";
 
     @Autowired
     UserService userService;
@@ -21,8 +28,8 @@ public class UserController {
     @GetMapping("user/{username}")
     public String userProfile(@PathVariable String username, Model model) {
         if (userService.getCurrentLoggedInUsername().equals(username)) {
-            model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
-            return "userProfile";
+            model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
+            return USER_PROFILE;
         } else {
             model.addAttribute("enteredUsername", username);
             return "user403";
@@ -49,13 +56,13 @@ public class UserController {
         }
 
         if (hasErrors) {
-            model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
-            return "userProfile";
+            model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
+            return USER_PROFILE;
         } else {
             userService.changeUserPassword(username, password);
-            model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+            model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
             model.addAttribute("responseMessage", "success");
-            return "userProfile";
+            return USER_PROFILE;
         }
     }
 

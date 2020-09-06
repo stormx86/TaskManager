@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 
+/**
+ * @author Anton Kozhanov
+ * Delete tasks functionality
+ */
 @Controller
 @RequestMapping("/editTask")
 @PreAuthorize("hasAuthority('ADMIN')")

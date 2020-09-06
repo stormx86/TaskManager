@@ -3,8 +3,6 @@ package pl.kozhanov.TaskManager.service;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,7 +72,6 @@ class UserServiceTest {
         User user = new User();
         String username = "Nick";
         String password = "123";
-        //Mockito.doReturn(user).when(userRepo).findByUsername(username);
         Mockito.when(userRepo.findByUsername(username)).thenReturn(user);
         Mockito.when(passwordEncoder.encode(password)).thenReturn("321");
         userService.changeUserPassword(username, password);

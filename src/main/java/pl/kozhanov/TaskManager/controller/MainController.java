@@ -22,6 +22,10 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 
+/**
+ * @author Anton Kozhanov
+ * Getting new tasks and change task status functionality
+ */
 @Controller
 public class MainController {
 
@@ -49,7 +53,6 @@ public class MainController {
     public String refresh(Map<String, Object> model) throws IOException, GeneralSecurityException {
         for (Task t : taskParserService.getTask()) {
             taskRepo.save(t);
-            System.out.println("Task saved");
         }
         return "redirect:/";
     }

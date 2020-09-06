@@ -38,7 +38,7 @@ public class TaskParserService {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final String USER_ID = "me";
-    private static String query = "in:inbox is:unread";
+    private static final String QUERY = "in:inbox is:unread";
 
 
 
@@ -78,7 +78,7 @@ public class TaskParserService {
     public List<Task> getTask() throws IOException, GeneralSecurityException {
         Gmail service = getGmailService();
         List<Task> tasks = new ArrayList<>();
-        ListMessagesResponse response = service.users().messages().list(USER_ID).setQ(query).execute();
+        ListMessagesResponse response = getListMessagesResponse(service);
         List<Message> messages = response.getMessages();
         if (messages != null) {
             for (Message message : messages) {
@@ -90,7 +90,7 @@ public class TaskParserService {
         return tasks;
     }
 
-    private Task formTask(Message newMessage) {
+    public Task formTask(Message newMessage) {
         List<MessagePartHeader> headers = newMessage.getPayload().getHeaders();
         String subject = "";
         Instant receivedAt = Instant.ofEpochMilli(newMessage.getInternalDate());
@@ -106,7 +106,7 @@ public class TaskParserService {
         return new Task(receivedAt, sentBy, subject, snippet, status, editBy);
     }
 
-    private Gmail getGmailService() throws GeneralSecurityException, IOException {
+    public Gmail getGmailService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         return new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
@@ -115,17 +115,21 @@ public class TaskParserService {
 
     public boolean checkTask() throws IOException, GeneralSecurityException {
         Gmail service = getGmailService();
-        ListMessagesResponse response = service.users().messages().list(USER_ID).setQ(query).execute();
+        ListMessagesResponse response = getListMessagesResponse(service);
         return (response.getMessages() != null);
     }
 
+    public ListMessagesResponse getListMessagesResponse(Gmail service) throws IOException {
+        return service.users().messages().list(USER_ID).setQ(QUERY).execute();
+    }
 
-    public static String getHeader(List<MessagePartHeader> headers, String name) {
+
+    public String getHeader(List<MessagePartHeader> headers, String name) {
         for (MessagePartHeader h : headers) {
             if (h.getName().equals(name)) {
                 return h.getValue();
             }
         }
-        return null;
+        return "no header";
     }
 }

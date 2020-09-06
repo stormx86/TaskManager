@@ -14,10 +14,22 @@ import pl.kozhanov.TaskManager.service.UserService;
 import javax.validation.Valid;
 import java.util.Map;
 
+/**
+ * @author Anton Kozhanov
+ * Class provides couple of controller methods to manage Admin Panel
+ */
+
 @Controller
 @RequestMapping("/admin")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
+
+
+    private static final String LOGGED_USER = "loggedUser";
+    private static final String ROLES = "roles";
+    private static final String USER = "user";
+    private static final String USER_EDIT = "userEdit";
+    private static final String USERS = "users";
 
     @Autowired
     private UserRepo userRepo;
@@ -27,17 +39,17 @@ public class AdminController {
 
     @GetMapping
     public String userList(Model model){
-        model.addAttribute("users", userService.findAll());
-        model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+        model.addAttribute(USERS, userService.findAll());
+        model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
         return "adminPanel";
     }
 
     @GetMapping("{user}")
     public String userEditForm(@PathVariable User user, Model model){
-        model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
-        model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
-        return  "userEdit";
+        model.addAttribute(USER, user);
+        model.addAttribute(ROLES, Role.values());
+        model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
+        return USER_EDIT;
     }
 
     @PostMapping("/addUser")
@@ -52,15 +64,15 @@ public class AdminController {
             userService.addUser(user);
             model.addAttribute("responseMessage", "success");
         }
-        model.addAttribute("users", userService.findAll());
-        model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+        model.addAttribute(USERS, userService.findAll());
+        model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
         return "adminPanel";
     }
 
     @GetMapping("delete/{user}")
     public String deleteUser(@PathVariable User user, Model model){
         userRepo.delete(user);
-        model.addAttribute("users", userService.findAll());
+        model.addAttribute(USERS, userService.findAll());
 
         return "redirect:/admin";
     }
@@ -86,20 +98,20 @@ public class AdminController {
                 model.addAttribute("responseMessage", "success");
             }
 
-        model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
-        model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
-        return "userEdit";
+        model.addAttribute(USER, user);
+        model.addAttribute(ROLES, Role.values());
+        model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
+        return USER_EDIT;
     }
 
     @GetMapping("resetUserPassword/{user}")
     public String resetUserPassword(@PathVariable User user, Model model){
         userService.resetUserPassword(user);
-        model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
-        model.addAttribute("loggedUser", userService.getCurrentLoggedInUsername());
+        model.addAttribute(USER, user);
+        model.addAttribute(ROLES, Role.values());
+        model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
         model.addAttribute("resetResponseMessage", "success");
-        return "userEdit";
+        return USER_EDIT;
     }
 
 }

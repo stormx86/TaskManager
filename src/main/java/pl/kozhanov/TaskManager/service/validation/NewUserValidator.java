@@ -19,7 +19,7 @@ public class NewUserValidator implements ConstraintValidator<NewUserConstraint, 
 
     @Override
     public boolean isValid(String username, ConstraintValidatorContext constraintValidatorContext) {
-        if(userService.findAll().contains(userService.findByUsername(username))) return false;
+        if (userService.findAll().contains(userService.findByUsername(username))) return false;
         else return true;
     }
 }
