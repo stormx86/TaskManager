@@ -35,6 +35,7 @@ The main purpose and motivation is to improve my Java skills.
 
 ## Features
 List of features ready
+* Authentication & authorization system
 * When a new message(task) arrives in the mailbox, the user receives a notification on the main screen and can update the list getting a new task on it
 * One of the two statuses available for the task - "Waiting" or "Processing"
 * Tasks with the "Processing" status are marked with the name of the user who accepted them for processing
