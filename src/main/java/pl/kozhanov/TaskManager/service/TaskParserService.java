@@ -26,9 +26,9 @@ import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TaskParserService {
@@ -39,32 +39,18 @@ public class TaskParserService {
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final String USER_ID = "me";
     private static final String QUERY = "in:inbox is:unread";
-
-
-
-    /**
-     * Global instance of the scopes required by this quickstart.
-     * If modifying these scopes, delete your previously saved tokens/ folder.
-     */
     private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_MODIFY);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+    private static final String FROM = "From";
+    private static final String SUBJECT = "Subject";
+    private static final String STATUS = "Waiting";
 
-    /**
-     * Creates an authorized Credential object.
-     *
-     * @param HTTP_TRANSPORT The network HTTP Transport.
-     * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        // Load client secrets.
         InputStream in = TaskParserService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
@@ -74,7 +60,6 @@ public class TaskParserService {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-
     public List<Task> getTask() throws IOException, GeneralSecurityException {
         Gmail service = getGmailService();
         List<Task> tasks = new ArrayList<>();
@@ -82,7 +67,9 @@ public class TaskParserService {
         List<Message> messages = response.getMessages();
         if (messages != null) {
             for (Message message : messages) {
-                service.users().messages().modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<>(Arrays.asList("UNREAD")))).execute();
+                service.users()
+                        .messages()
+                        .modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<>(Collections.singletonList("UNREAD")))).execute();
                 Message newMessage = service.users().messages().get(USER_ID, message.getId()).execute();
                 tasks.add(formTask(newMessage));
             }
@@ -90,20 +77,26 @@ public class TaskParserService {
         return tasks;
     }
 
-    public Task formTask(Message newMessage) {
-        List<MessagePartHeader> headers = newMessage.getPayload().getHeaders();
-        String subject = "";
-        Instant receivedAt = Instant.ofEpochMilli(newMessage.getInternalDate());
-        String sentBy = getHeader(headers, "From");
-        if (getHeader(headers, "Subject") != null) {
-            subject = getHeader(headers, "Subject");
-        } else {
-            subject = "No Subject";
-        }
-        String snippet = newMessage.getSnippet();
-        String status = "Waiting";
-        String editBy = "";
-        return new Task(receivedAt, sentBy, subject, snippet, status, editBy);
+    private Task formTask(Message newMessage) {
+        Task task = new Task();
+        task.setStatus(STATUS);
+        task.setEditBy("");
+        task.setSnippet(newMessage.getSnippet());
+        task.setReceivedAt(Instant.ofEpochMilli(newMessage.getInternalDate()));
+        task.setSentBy(getHeader(newMessage.getPayload().getHeaders(), FROM));
+        task.setSubject(getHeader(newMessage.getPayload().getHeaders(), SUBJECT));
+        return task;
+    }
+
+    public String getHeader(List<MessagePartHeader> headers, String name) {
+        return headers.stream()
+                .filter(header -> header.getName().equals(name))
+                .map(
+                        header -> (header.getValue() == null || header.getValue().equals(""))
+                                ? "No subject"
+                                : header.getValue()
+                )
+                .collect(Collectors.toList()).get(0);
     }
 
     public Gmail getGmailService() throws GeneralSecurityException, IOException {
@@ -124,12 +117,4 @@ public class TaskParserService {
     }
 
 
-    public String getHeader(List<MessagePartHeader> headers, String name) {
-        for (MessagePartHeader h : headers) {
-            if (h.getName().equals(name)) {
-                return h.getValue();
-            }
-        }
-        return "no header";
-    }
 }
