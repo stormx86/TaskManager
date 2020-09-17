@@ -5,8 +5,9 @@
     <#import "parts/pager.ftl" as p>
     <title>Welcome to the Task Manager</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href ="css/main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 
     <!-- POST request, calling changeStatus method-->
     <script>
@@ -69,7 +70,6 @@
 
     </script>
 
-
     </head>
 <body>
 <div class="container-fluid">
@@ -85,10 +85,11 @@
             <table id = "tasksTable" class="table table-hover table-bordered">
                 <tr>
                     <th style="display:none;">id</th>
-                    <th style="width: 8%" scope="col">Received On</th>
+                    <th style="width: 7%" scope="col">Received On</th>
                     <th style="width: 9%" scope="col">From</th>
                     <th style="width: 20%" scope="col">Subject</th>
                     <th scope="col">Snippet</th>
+                    <th style="width: 5%" scope="col">Attachments</th>
                     <th style="width: 6%" scope="col">Status</th>
                     <th style="width: 8%" scope="col">Changed By</th>
                     <@security.authorize access="hasAnyAuthority('ADMIN')">
@@ -102,6 +103,15 @@
                         <td>${task.sentBy}</td>
                         <td style="height: 90px">${task.subject}</td>
                         <td>${task.snippet}</td>
+                        <td align="center">
+                            <#if task.hasAttachment==true>
+                            <form action="/editTask/getAttachment/${task.messageId}" method="get">
+                                    <button type="submit" class="btn btn-link" title="Download">
+                                        <i style="color: black; alignment: center" class="fas fa-download" aria-hidden="true"></i>
+                                    </button>
+                            </form>
+                            </#if>
+                        </td>
                         <td class="status">${task.status}</td>
                         <td class="editBy">${task.editBy}</td>
                         <@security.authorize access="hasAnyAuthority('ADMIN')">
@@ -112,8 +122,6 @@
                             </td>
                         </@security.authorize>
                     </tr>
-                <#else>
-                    No task
                 </#list>
             </table>
         </div>

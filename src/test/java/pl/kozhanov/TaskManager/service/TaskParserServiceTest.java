@@ -36,6 +36,6 @@ class TaskParserServiceTest {
         mph.setName("headerName");
         mph.setValue("headerValue");
         listMph.add(mph);
-        assertEquals("headerValue", taskParserService.getHeader(listMph, "headerName"));
+        assertEquals("headerValue", taskParserService.getSpecifiedHeader(listMph, "headerName"));
     }
 }
