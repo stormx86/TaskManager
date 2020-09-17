@@ -21,6 +21,8 @@ public class Task {
     private String snippet;
     private String status;
     private String editBy;
+    private boolean hasAttachment;
+    private String messageId;
 
     public Task() {
     }
@@ -88,5 +90,21 @@ public class Task {
 
     public void setEditBy(String editBy) {
         this.editBy = editBy;
+    }
+
+    public boolean isHasAttachment() {
+        return hasAttachment;
+    }
+
+    public void setHasAttachment(boolean hasAttachment) {
+        this.hasAttachment = hasAttachment;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 }

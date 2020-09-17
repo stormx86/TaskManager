@@ -9,26 +9,25 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.Base64;
+import com.google.api.client.util.StringUtils;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.api.services.gmail.model.ListMessagesResponse;
-import com.google.api.services.gmail.model.Message;
-import com.google.api.services.gmail.model.MessagePartHeader;
-import com.google.api.services.gmail.model.ModifyMessageRequest;
+import com.google.api.services.gmail.model.*;
 import org.springframework.stereotype.Component;
+import pl.kozhanov.TaskManager.domain.Attachment;
 import pl.kozhanov.TaskManager.domain.Task;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Component
 public class TaskParserService {
@@ -39,32 +38,18 @@ public class TaskParserService {
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final String USER_ID = "me";
     private static final String QUERY = "in:inbox is:unread";
-
-
-
-    /**
-     * Global instance of the scopes required by this quickstart.
-     * If modifying these scopes, delete your previously saved tokens/ folder.
-     */
     private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_MODIFY);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+    private static final String FROM = "From";
+    private static final String SUBJECT = "Subject";
+    private static final String STATUS = "Waiting";
 
-    /**
-     * Creates an authorized Credential object.
-     *
-     * @param HTTP_TRANSPORT The network HTTP Transport.
-     * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        // Load client secrets.
         InputStream in = TaskParserService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
@@ -74,7 +59,6 @@ public class TaskParserService {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-
     public List<Task> getTask() throws IOException, GeneralSecurityException {
         Gmail service = getGmailService();
         List<Task> tasks = new ArrayList<>();
@@ -82,7 +66,9 @@ public class TaskParserService {
         List<Message> messages = response.getMessages();
         if (messages != null) {
             for (Message message : messages) {
-                service.users().messages().modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<>(Arrays.asList("UNREAD")))).execute();
+                service.users()
+                        .messages()
+                        .modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<>(Collections.singletonList("UNREAD")))).execute();
                 Message newMessage = service.users().messages().get(USER_ID, message.getId()).execute();
                 tasks.add(formTask(newMessage));
             }
@@ -90,20 +76,67 @@ public class TaskParserService {
         return tasks;
     }
 
-    public Task formTask(Message newMessage) {
-        List<MessagePartHeader> headers = newMessage.getPayload().getHeaders();
-        String subject = "";
-        Instant receivedAt = Instant.ofEpochMilli(newMessage.getInternalDate());
-        String sentBy = getHeader(headers, "From");
-        if (getHeader(headers, "Subject") != null) {
-            subject = getHeader(headers, "Subject");
-        } else {
-            subject = "No Subject";
+    private Task formTask(Message newMessage) {
+        Task task = new Task();
+        task.setStatus(STATUS);
+        task.setEditBy("");
+        task.setSnippet(newMessage.getSnippet());
+        task.setReceivedAt(Instant.ofEpochMilli(newMessage.getInternalDate()));
+        task.setSentBy(getSpecifiedHeader(newMessage.getPayload().getHeaders(), FROM));
+        task.setSubject(getSpecifiedHeader(newMessage.getPayload().getHeaders(), SUBJECT));
+        task.setHasAttachment(checkIfHasAttachment(newMessage));
+        task.setMessageId(newMessage.getId());
+        return task;
+    }
+
+    private boolean checkIfHasAttachment(Message newMessage) {
+        List<MessagePart> part = newMessage.getPayload().getParts();
+        return part.stream().anyMatch(p -> p.getFilename() != null && p.getFilename().length() > 0);
+    }
+
+
+    public List<Attachment> collectAttachmentsBeforeZip(String messageId) throws GeneralSecurityException, IOException {
+        List<Attachment> attachmentList = new ArrayList<>();
+        Gmail service = getGmailService();
+        Message message = service.users().messages().get(USER_ID, messageId).execute();
+        List<MessagePart> part = message.getPayload().getParts();
+        for (MessagePart p : part) {
+            if (p.getFilename() != null && p.getFilename().length() > 0) {
+                String attId = p.getBody().getAttachmentId();
+                MessagePartBody attachPart = service.users().messages().attachments().get(USER_ID, p.getPartId(), attId).execute();
+                attachmentList.add(new Attachment(Base64.decodeBase64(attachPart.getData()), p.getFilename()));
+            }
         }
-        String snippet = newMessage.getSnippet();
-        String status = "Waiting";
-        String editBy = "";
-        return new Task(receivedAt, sentBy, subject, snippet, status, editBy);
+        return attachmentList;
+    }
+
+    public Attachment getZipAttachment(String messageId) throws IOException, GeneralSecurityException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+        for (Attachment attachment : collectAttachmentsBeforeZip(messageId)) {
+            String filename = attachment.getFileName();
+            ZipEntry entry = new ZipEntry(filename);
+            entry.setSize(attachment.getBody().length);
+            zos.putNextEntry(entry);
+            zos.write(attachment.getBody());
+            zos.closeEntry();
+        }
+        zos.close();
+        baos.close();
+        return new Attachment(baos.toByteArray(), "attachment.zip");
+
+    }
+
+
+    public String getSpecifiedHeader(List<MessagePartHeader> headers, String name) {
+        return headers.stream()
+                .filter(header -> header.getName().equals(name))
+                .map(
+                        header -> (header.getValue() == null || header.getValue().equals(""))
+                                ? "No subject"
+                                : header.getValue()
+                )
+                .collect(Collectors.toList()).get(0);
     }
 
     public Gmail getGmailService() throws GeneralSecurityException, IOException {
@@ -124,12 +157,4 @@ public class TaskParserService {
     }
 
 
-    public String getHeader(List<MessagePartHeader> headers, String name) {
-        for (MessagePartHeader h : headers) {
-            if (h.getName().equals(name)) {
-                return h.getValue();
-            }
-        }
-        return "no header";
-    }
 }

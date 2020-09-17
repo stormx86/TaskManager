@@ -37,6 +37,7 @@ The main purpose and motivation is to improve my Java skills.
 List of features ready
 * Authentication & authorization system
 * When a new message(task) arrives in the mailbox, the user receives a notification on the main screen and can update the list getting a new task on it
+* User can read the message text and download attachments(for multiple files .zip is generated automatically)
 * One of the two statuses available for the task - "Waiting" or "Processing"
 * Tasks with the "Processing" status are marked with the name of the user who accepted them for processing
 * Two global roles: USER, ADMIN
@@ -52,3 +53,4 @@ Project is: _in progress_
 
 ## Contact
 Created by Anton Kozhanov [deal.for at gmail.com] - feel free to contact me!
+

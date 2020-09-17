@@ -52,8 +52,7 @@ public class UserService implements UserDetailsService {
     public void saveUser(User user, String newUsername, Map<String, String> form) {
         user.setUsername(newUsername);
         Set<String> roles = Arrays.stream(Role.values()).map(Role::name).collect(Collectors.toSet());
-        if(user.getRoles() != null)
-        {
+        if (user.getRoles() != null) {
             user.getRoles().clear();
         }
         for (String key : form.keySet()) {

@@ -23,8 +23,6 @@ class UserServiceTest {
 
     private UserRepo userRepo = mock(UserRepo.class);
 
-    private UserDetails userDetails = mock(UserDetails.class);
-
     private PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
 
     private SecurityContextHolder securityContextHolder = spy(SecurityContextHolder.class);
