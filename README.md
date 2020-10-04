@@ -1,5 +1,5 @@
 # Task Manager
-> Application provides a possibility to group of users(some team) to manage tasks(via web interface) sent by a third party to a specific gmail mailbox.
+> Application provides a group of users (some team) with possibility to manage tasks sent by a third party to a specified gmail mailbox.
 
 ## Table of contents
 * [General info](#general-info)
@@ -27,7 +27,7 @@ The main purpose and motivation is to improve my Java skills.
 * Maven - version 3.6.1
 * MySQL - version 5.1
 * Freemarker - version 2.3.29
-* Google API - version 1.23.0
+* Gmail API - version 1.23.0
 * HTML
 * CSS
 * Java Script

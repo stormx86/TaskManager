@@ -29,7 +29,6 @@ public class LoginTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Sign In Please")));
-                //.andExpect(model().attributeExists("RequestParameters"));
     }
 }
 
