@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.service;
+package pl.kozhanov.taskmanager.service;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
@@ -6,9 +6,9 @@ import org.mockito.Mockito;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import pl.kozhanov.TaskManager.domain.Role;
-import pl.kozhanov.TaskManager.domain.User;
-import pl.kozhanov.TaskManager.repos.UserRepo;
+import pl.kozhanov.taskmanager.domain.Role;
+import pl.kozhanov.taskmanager.domain.User;
+import pl.kozhanov.taskmanager.repos.UserRepo;
 
 import java.util.Collections;
 import java.util.HashMap;

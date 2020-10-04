@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.service;
+package pl.kozhanov.taskmanager.service;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -10,14 +10,15 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
-import com.google.api.client.util.StringUtils;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.*;
-import org.springframework.stereotype.Component;
-import pl.kozhanov.TaskManager.domain.Attachment;
-import pl.kozhanov.TaskManager.domain.Task;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
+import pl.kozhanov.taskmanager.domain.Attachment;
+import pl.kozhanov.taskmanager.domain.Task;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Component
+@Service
 public class TaskParserService {
 
 
@@ -43,6 +44,7 @@ public class TaskParserService {
     private static final String FROM = "From";
     private static final String SUBJECT = "Subject";
     private static final String STATUS = "Waiting";
+
 
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         InputStream in = TaskParserService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
@@ -146,8 +148,7 @@ public class TaskParserService {
                 .build();
     }
 
-    public boolean checkTask() throws IOException, GeneralSecurityException {
-        Gmail service = getGmailService();
+    public boolean checkTask(Gmail service) throws IOException {
         ListMessagesResponse response = getListMessagesResponse(service);
         return (response.getMessages() != null);
     }

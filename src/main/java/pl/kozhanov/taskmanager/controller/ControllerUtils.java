@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.controller;
+package pl.kozhanov.taskmanager.controller;
 
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;

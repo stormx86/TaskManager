@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.domain;
+package pl.kozhanov.taskmanager.domain;
 
 public class Attachment {
 

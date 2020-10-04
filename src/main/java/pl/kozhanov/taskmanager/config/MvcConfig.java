@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.config;
+package pl.kozhanov.taskmanager.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;

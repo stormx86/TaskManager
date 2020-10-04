@@ -1,7 +1,7 @@
-package pl.kozhanov.TaskManager.repos;
+package pl.kozhanov.taskmanager.repos;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.kozhanov.TaskManager.domain.User;
+import pl.kozhanov.taskmanager.domain.User;
 
 import java.util.List;
 

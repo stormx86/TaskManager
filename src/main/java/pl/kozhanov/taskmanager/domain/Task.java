@@ -1,13 +1,10 @@
-package pl.kozhanov.TaskManager.domain;
-
-import com.google.api.client.util.DateTime;
+package pl.kozhanov.taskmanager.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 public class Task {

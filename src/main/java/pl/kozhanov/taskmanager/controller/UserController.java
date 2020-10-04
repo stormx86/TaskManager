@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.controller;
+package pl.kozhanov.taskmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import pl.kozhanov.TaskManager.service.UserService;
+import pl.kozhanov.taskmanager.service.UserService;
 
 /**
  * @author Anton Kozhanov

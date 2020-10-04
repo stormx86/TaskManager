@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.service;
+package pl.kozhanov.taskmanager.service;
 
 import java.time.Instant;
 import java.time.ZoneId;

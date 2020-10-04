@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.controller;
+package pl.kozhanov.taskmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -6,10 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import pl.kozhanov.TaskManager.domain.Role;
-import pl.kozhanov.TaskManager.domain.User;
-import pl.kozhanov.TaskManager.repos.UserRepo;
-import pl.kozhanov.TaskManager.service.UserService;
+import pl.kozhanov.taskmanager.domain.Role;
+import pl.kozhanov.taskmanager.domain.User;
+import pl.kozhanov.taskmanager.repos.UserRepo;
+import pl.kozhanov.taskmanager.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Map;

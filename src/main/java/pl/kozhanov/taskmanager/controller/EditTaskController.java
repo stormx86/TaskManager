@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.controller;
+package pl.kozhanov.taskmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -9,10 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import pl.kozhanov.TaskManager.repos.TaskRepo;
-import pl.kozhanov.TaskManager.service.TaskParserService;
+import pl.kozhanov.taskmanager.repos.TaskRepo;
+import pl.kozhanov.taskmanager.service.TaskParserService;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 

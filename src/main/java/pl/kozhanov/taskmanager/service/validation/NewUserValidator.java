@@ -1,8 +1,7 @@
-package pl.kozhanov.TaskManager.service.validation;
+package pl.kozhanov.taskmanager.service.validation;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.kozhanov.TaskManager.domain.User;
-import pl.kozhanov.TaskManager.service.UserService;
+import pl.kozhanov.taskmanager.service.UserService;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

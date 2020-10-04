@@ -1,8 +1,8 @@
-package pl.kozhanov.TaskManager.domain;
+package pl.kozhanov.taskmanager.domain;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.kozhanov.TaskManager.service.validation.NewUserConstraint;
+import pl.kozhanov.taskmanager.service.validation.NewUserConstraint;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;

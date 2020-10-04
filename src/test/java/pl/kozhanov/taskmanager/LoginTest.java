@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager;
+package pl.kozhanov.taskmanager;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

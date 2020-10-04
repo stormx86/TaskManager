@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.service.validation;
+package pl.kozhanov.taskmanager.service.validation;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

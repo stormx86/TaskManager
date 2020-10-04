@@ -1,4 +1,4 @@
-package pl.kozhanov.TaskManager.controller;
+package pl.kozhanov.taskmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import pl.kozhanov.TaskManager.domain.Task;
-import pl.kozhanov.TaskManager.service.TaskParserService;
-import pl.kozhanov.TaskManager.repos.TaskRepo;
+import pl.kozhanov.taskmanager.domain.Task;
+import pl.kozhanov.taskmanager.service.TaskParserService;
+import pl.kozhanov.taskmanager.repos.TaskRepo;
 
 import org.springframework.data.domain.Pageable;
-import pl.kozhanov.TaskManager.service.TaskViewProjection;
-import pl.kozhanov.TaskManager.service.UserService;
+import pl.kozhanov.taskmanager.service.TaskViewProjection;
+import pl.kozhanov.taskmanager.service.UserService;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -79,7 +79,7 @@ public class MainController {
     @PostMapping(value = "checktask")
     @ResponseBody
     public String checkTask() throws IOException, GeneralSecurityException {
-        if (taskParserService.checkTask()) {
+        if (taskParserService.checkTask(taskParserService.getGmailService())) {
             return ("New Task available!");
         }
         return ("");
