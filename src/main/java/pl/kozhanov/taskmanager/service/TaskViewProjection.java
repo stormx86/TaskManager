@@ -8,21 +8,13 @@ import java.time.format.DateTimeFormatter;
 public interface TaskViewProjection {
 
     Integer getId();
-
     Instant getReceivedAt();
-
     String getSentBy();
-
     String getSubject();
-
     String getSnippet();
-
     String getStatus();
-
     String getEditBy();
-
     boolean getHasAttachment();
-
     String getMessageId();
 
     default String getReceivedAtFormatted() {

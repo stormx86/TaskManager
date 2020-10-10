@@ -21,9 +21,12 @@ public class UserController {
 
     private static final String LOGGED_USER = "loggedUser";
     private static final String USER_PROFILE = "userProfile";
+    private UserService userService;
 
     @Autowired
-    UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("user/{username}")
     public String userProfile(@PathVariable String username, Model model) {
@@ -65,5 +68,4 @@ public class UserController {
             return USER_PROFILE;
         }
     }
-
 }

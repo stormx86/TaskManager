@@ -8,7 +8,6 @@ import java.time.Instant;
 
 @Entity
 public class Task {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;

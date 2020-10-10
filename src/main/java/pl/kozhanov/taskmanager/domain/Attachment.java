@@ -3,7 +3,6 @@ package pl.kozhanov.taskmanager.domain;
 public class Attachment {
 
     private byte[] body;
-
     private String fileName;
 
     public Attachment(byte[] body, String fileName) {

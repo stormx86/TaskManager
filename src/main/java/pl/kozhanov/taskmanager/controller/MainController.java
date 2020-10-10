@@ -29,15 +29,16 @@ import java.util.Map;
 @Controller
 public class MainController {
 
-    @Autowired
     private TaskRepo taskRepo;
-
-    @Autowired
     private TaskParserService taskParserService;
-
-    @Autowired
     private UserService userService;
 
+    @Autowired
+    public MainController(TaskRepo taskRepo, TaskParserService taskParserService, UserService userService) {
+        this.taskRepo = taskRepo;
+        this.taskParserService = taskParserService;
+        this.userService = userService;
+    }
 
     @GetMapping("/")
     public String index(Model model, Pageable pageable) {
@@ -56,7 +57,6 @@ public class MainController {
         }
         return "redirect:/";
     }
-
 
     @PostMapping(value = "changestatus")
     @ResponseBody
@@ -84,6 +84,4 @@ public class MainController {
         }
         return ("");
     }
-
-
 }

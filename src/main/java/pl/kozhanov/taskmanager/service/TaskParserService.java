@@ -14,8 +14,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import pl.kozhanov.taskmanager.domain.Attachment;
 import pl.kozhanov.taskmanager.domain.Task;
@@ -33,7 +31,6 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class TaskParserService {
 
-
     private static final String APPLICATION_NAME = "Task Manager";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
@@ -44,7 +41,6 @@ public class TaskParserService {
     private static final String FROM = "From";
     private static final String SUBJECT = "Subject";
     private static final String STATUS = "Waiting";
-
 
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         InputStream in = TaskParserService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
@@ -70,7 +66,8 @@ public class TaskParserService {
             for (Message message : messages) {
                 service.users()
                         .messages()
-                        .modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(new ArrayList<>(Collections.singletonList("UNREAD")))).execute();
+                        .modify(USER_ID, message.getId(), new ModifyMessageRequest().setRemoveLabelIds(
+                                new ArrayList<>(Collections.singletonList("UNREAD")))).execute();
                 Message newMessage = service.users().messages().get(USER_ID, message.getId()).execute();
                 tasks.add(formTask(newMessage));
             }
@@ -96,8 +93,8 @@ public class TaskParserService {
         return part.stream().anyMatch(p -> p.getFilename() != null && p.getFilename().length() > 0);
     }
 
-
-    public List<Attachment> collectAttachmentsBeforeZip(String messageId) throws GeneralSecurityException, IOException {
+    private List<Attachment> collectAttachmentsBeforeZip(String messageId) throws GeneralSecurityException,
+            IOException {
         List<Attachment> attachmentList = new ArrayList<>();
         Gmail service = getGmailService();
         Message message = service.users().messages().get(USER_ID, messageId).execute();
@@ -105,7 +102,8 @@ public class TaskParserService {
         for (MessagePart p : part) {
             if (p.getFilename() != null && p.getFilename().length() > 0) {
                 String attId = p.getBody().getAttachmentId();
-                MessagePartBody attachPart = service.users().messages().attachments().get(USER_ID, p.getPartId(), attId).execute();
+                MessagePartBody attachPart = service.users().messages().attachments()
+                        .get(USER_ID, p.getPartId(), attId).execute();
                 attachmentList.add(new Attachment(Base64.decodeBase64(attachPart.getData()), p.getFilename()));
             }
         }
@@ -126,11 +124,10 @@ public class TaskParserService {
         zos.close();
         baos.close();
         return new Attachment(baos.toByteArray(), "attachment.zip");
-
     }
 
 
-    public String getSpecifiedHeader(List<MessagePartHeader> headers, String name) {
+    String getSpecifiedHeader(List<MessagePartHeader> headers, String name) {
         return headers.stream()
                 .filter(header -> header.getName().equals(name))
                 .map(
@@ -153,9 +150,7 @@ public class TaskParserService {
         return (response.getMessages() != null);
     }
 
-    public ListMessagesResponse getListMessagesResponse(Gmail service) throws IOException {
+    ListMessagesResponse getListMessagesResponse(Gmail service) throws IOException {
         return service.users().messages().list(USER_ID).setQ(QUERY).execute();
     }
-
-
 }

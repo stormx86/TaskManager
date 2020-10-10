@@ -11,8 +11,4 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
     Page<TaskViewProjection> findAllByOrderByReceivedAtDesc(Pageable pageable);
 
     Task findById(Integer id);
-
-
-
-
 }

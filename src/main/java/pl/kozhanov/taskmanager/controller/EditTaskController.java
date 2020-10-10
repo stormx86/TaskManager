@@ -24,11 +24,14 @@ import java.security.GeneralSecurityException;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class EditTaskController {
 
-    @Autowired
     private TaskRepo taskRepo;
+    private TaskParserService taskParserService;
 
     @Autowired
-    private TaskParserService taskParserService;
+    public EditTaskController(TaskRepo taskRepo, TaskParserService taskParserService) {
+        this.taskRepo = taskRepo;
+        this.taskParserService = taskParserService;
+    }
 
     @GetMapping("delete/{taskId}")
     public String deleteUser(@PathVariable String taskId) {
@@ -44,7 +47,8 @@ public class EditTaskController {
 
     @GetMapping("getAttachment/{messageId}")
     @ResponseBody
-    public ResponseEntity<Resource> getAttachment(@PathVariable String messageId) throws GeneralSecurityException, IOException {
+    public ResponseEntity<Resource> getAttachment(@PathVariable String messageId) throws GeneralSecurityException,
+            IOException {
         HttpHeaders headers = new HttpHeaders();
         String fName = taskParserService.getZipAttachment(messageId).getFileName();
         String fNameHeaderValue = "attachment;" + " " + "filename=" + fName;
@@ -58,5 +62,4 @@ public class EditTaskController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(new ByteArrayResource(taskParserService.getZipAttachment(messageId).getBody()));
     }
-
 }

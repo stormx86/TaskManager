@@ -19,16 +19,22 @@ import pl.kozhanov.taskmanager.service.UserService;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String LOGIN = "/login";
-    @Autowired
     private PasswordEncoder passwordEncoder;
+    private UserService userService;
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder(8);
     }
-
-    @Autowired
-    private UserService userService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -53,6 +59,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService)
                 .passwordEncoder(passwordEncoder);
-
     }
 }

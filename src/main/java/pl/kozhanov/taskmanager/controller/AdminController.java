@@ -24,28 +24,29 @@ import java.util.Map;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
-
     private static final String LOGGED_USER = "loggedUser";
     private static final String ROLES = "roles";
     private static final String USER = "user";
     private static final String USER_EDIT = "userEdit";
     private static final String USERS = "users";
-
-    @Autowired
     private UserRepo userRepo;
-
-    @Autowired
     private UserService userService;
 
+    @Autowired
+    public AdminController(UserRepo userRepo, UserService userService) {
+        this.userRepo = userRepo;
+        this.userService = userService;
+    }
+
     @GetMapping
-    public String userList(Model model){
+    public String userList(Model model) {
         model.addAttribute(USERS, userService.findAll());
         model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
         return "adminPanel";
     }
 
     @GetMapping("{user}")
-    public String userEditForm(@PathVariable User user, Model model){
+    public String userEditForm(@PathVariable User user, Model model) {
         model.addAttribute(USER, user);
         model.addAttribute(ROLES, Role.values());
         model.addAttribute(LOGGED_USER, userService.getCurrentLoggedInUsername());
@@ -53,14 +54,11 @@ public class AdminController {
     }
 
     @PostMapping("/addUser")
-    public String addUser(@Valid User user, BindingResult result, Model model)
-    {
-        if(result.hasErrors())
-        {
+    public String addUser(@Valid User user, BindingResult result, Model model) {
+        if (result.hasErrors()) {
             Map<String, String> errorsMap = ControllerUtils.getErrors(result);
             model.mergeAttributes(errorsMap);
-        }
-        else {
+        } else {
             userService.addUser(user);
             model.addAttribute("responseMessage", "success");
         }
@@ -70,33 +68,27 @@ public class AdminController {
     }
 
     @GetMapping("delete/{user}")
-    public String deleteUser(@PathVariable User user, Model model){
+    public String deleteUser(@PathVariable User user, Model model) {
         userRepo.delete(user);
         model.addAttribute(USERS, userService.findAll());
 
         return "redirect:/admin";
     }
 
-
     @PostMapping("/save")
     public String saveUser(
             @RequestParam String newUsername,
             @RequestParam Map<String, String> form,
             @RequestParam("userId") User user,
-            Model model){
-        if(newUsername.equals(""))
-            {
-                model.addAttribute("usernameError", "Username field can't be empty");
-            }
-        else if(userService.findAll().contains(userService.findByUsername(newUsername)))
-            {
-                model.addAttribute("usernameError", "Username already exists");
-            }
-        else
-            {
-                userService.saveUser(user, newUsername, form);
-                model.addAttribute("responseMessage", "success");
-            }
+            Model model) {
+        if (newUsername.equals("")) {
+            model.addAttribute("usernameError", "Username field can't be empty");
+        } else if (userService.findAll().contains(userService.findByUsername(newUsername))) {
+            model.addAttribute("usernameError", "Username already exists");
+        } else {
+            userService.saveUser(user, newUsername, form);
+            model.addAttribute("responseMessage", "success");
+        }
 
         model.addAttribute(USER, user);
         model.addAttribute(ROLES, Role.values());
@@ -105,7 +97,7 @@ public class AdminController {
     }
 
     @GetMapping("resetUserPassword/{user}")
-    public String resetUserPassword(@PathVariable User user, Model model){
+    public String resetUserPassword(@PathVariable User user, Model model) {
         userService.resetUserPassword(user);
         model.addAttribute(USER, user);
         model.addAttribute(ROLES, Role.values());
@@ -113,5 +105,4 @@ public class AdminController {
         model.addAttribute("resetResponseMessage", "success");
         return USER_EDIT;
     }
-
 }
